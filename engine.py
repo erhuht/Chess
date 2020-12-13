@@ -1,5 +1,6 @@
 import chess
 import chess.svg
+import chess.pgn
 import random
 import time
 from IPython.display import display, Markdown, clear_output
@@ -11,7 +12,6 @@ class Player:
 
 class RandomPlayer(Player):
     def move(self, board):
-        time.sleep(0.5)
         return random.choice([move for move in board.legal_moves])
 
 class AIPlayer(Player):
@@ -80,11 +80,13 @@ class HumanPlayer(Player):
         
 
 board = chess.Board()
-white = HumanPlayer(chess.WHITE)
-black = AIPlayer(chess.BLACK)
+white = AIPlayer(chess.WHITE)
+black = RandomPlayer(chess.BLACK)
 
 
 move_number = 0
+game = chess.pgn.Game()
+node = game
 while not board.is_game_over():
     move_number += 1
     if board.turn == chess.WHITE:
@@ -93,7 +95,8 @@ while not board.is_game_over():
     else:
         move = black.move(board)
         board.push(move)
-        
+    node = node.add_variation(move)
+
     clear_output(wait=True)
     display(Markdown(chess.svg.board(board, size=400, lastmove=move)))
 
@@ -106,3 +109,5 @@ elif board.result() == "1/2-1/2":
     print("It's a draw on move %d" % move_number)
 else:
     print("Something has gone wrong")
+
+print(game, file=open("game.pgn", "w"), end="\n\n")
