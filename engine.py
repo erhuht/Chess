@@ -68,10 +68,19 @@ class AIPlayer(Player):
 
         return material
 
-
+class HumanPlayer(Player):
+    def move(self, board):
+        while True:
+            try:
+                move = board.parse_san(input("Move: "))
+            except ValueError:
+                print("Invalid move")
+            else:
+                return move
+        
 
 board = chess.Board()
-white = AIPlayer(chess.WHITE)
+white = HumanPlayer(chess.WHITE)
 black = AIPlayer(chess.BLACK)
 
 
