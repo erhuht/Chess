@@ -21,9 +21,9 @@ class AIPlayer(Player):
 
     def move(self, board):
         moves = {}
-        for move in board.legal_moves:
+        for move in board.legal_moves: #depth 0
             board.push(move)
-            moves[move] = self.evaluate_move(board, 1)
+            moves[move] = self.evaluate_move(board, 1, -41, 41)
             board.pop()
 
         best_moves = []
@@ -34,24 +34,34 @@ class AIPlayer(Player):
         return random.choice(best_moves)
             
 
-    def evaluate_move(self, board, depth):
+    def evaluate_move(self, board, depth, alpha, beta):
         if depth % 2: #if depth is odd ie. minimizing player
-            points = 40
+            extremepoints = 40
         else:
-            points = -40
+            extremepoints = -40
 
         for move in board.legal_moves:
             if depth < self.depth_limit:
                 board.push(move)
                 if depth % 2: #if depth is odd ie. minimizing player
-                    points = min(points, self.evaluate_move(board, depth+1))
+                    points = self.evaluate_move(board, depth+1, alpha, beta)
+                    extremepoints = min(extremepoints, points)
+                    beta = min(beta, points)
+                    if alpha >= beta: # beta cutoff
+                        board.pop()
+                        break
                 else:
-                    points = max(points, self.evaluate_move(board, depth+1))
+                    points = self.evaluate_move(board, depth+1, alpha, beta)
+                    extremepoints = max(extremepoints, points)
+                    alpha = max(alpha, points)
+                    if beta <= alpha: # alpha cutoff
+                        board.pop()
+                        break
                 board.pop()
             else:
                 return self.calculate_material(board)
 
-        return points
+        return extremepoints
     
     def calculate_material(self, board):
         material = 0
@@ -68,7 +78,7 @@ class AIPlayer(Player):
 
         return material
 
-class HumanPlayer(Player):
+class HumanPlayer(Player): # Input is unreliable in jupyter, works after a few restarts
     def move(self, board):
         while True:
             try:
@@ -80,9 +90,9 @@ class HumanPlayer(Player):
         
 
 board = chess.Board()
-white = AIPlayer(chess.WHITE)
-black = RandomPlayer(chess.BLACK)
-
+white = HumanPlayer(chess.WHITE)
+black = AIPlayer(chess.BLACK)
+perspective = chess.WHITE
 
 move_number = 0
 game = chess.pgn.Game()
@@ -98,7 +108,7 @@ while not board.is_game_over():
     node = node.add_variation(move)
 
     clear_output(wait=True)
-    display(Markdown(chess.svg.board(board, size=400, lastmove=move)))
+    display(Markdown(chess.svg.board(board, size=400, lastmove=move, orientation=perspective)))
 
 print("\n")
 if board.result() == "1-0":
