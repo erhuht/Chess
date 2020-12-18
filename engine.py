@@ -1,10 +1,6 @@
 import chess
-import chess.svg
-import chess.pgn
 import random
-import time
-from IPython.display import display, Markdown, clear_output
-from math import ceil
+
 
 class Player:
     def __init__(self, color):
@@ -121,7 +117,7 @@ class AIPlayer(Player):
         #Occupy center x
         #Own piece-square tables?
         #Game phases?
-        #Connect Rooks?
+        #Connect Rooks x
         #avoid draw x
         #Knight on rim x
 
@@ -204,37 +200,3 @@ class HumanPlayer(Player): # Input is unreliable in jupyter, works after a few r
                 print("Invalid move")
             else:
                 return move
-        
-
-board = chess.Board()
-white = AIPlayer(chess.WHITE)
-black = AIPlayer(chess.BLACK)
-perspective = chess.WHITE
-
-move_number = 0
-game = chess.pgn.Game()
-node = game
-while not board.is_game_over():
-    move_number += 1
-    if board.turn == chess.WHITE:
-        move = white.move(board)
-        board.push(move)
-    else:
-        move = black.move(board)
-        board.push(move)
-    node = node.add_variation(move)
-
-    clear_output(wait=True)
-    display(Markdown(chess.svg.board(board, size=400, lastmove=move, orientation=perspective)))
-
-print("\n")
-if board.result() == "1-0":
-    print("White won on move %d" % ceil(move_number/2))
-elif board.result() == "0-1":
-    print("Black won on move %d" % ceil(move_number/2))
-elif board.result() == "1/2-1/2":
-    print("It's a draw on move %d" % ceil(move_number/2))
-else:
-    print("Something has gone wrong")
-
-print(game, file=open("game.pgn", "w"), end="\n\n")
